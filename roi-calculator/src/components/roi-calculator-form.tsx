@@ -16,7 +16,7 @@ import { ROIResults } from '@/components/roi-results';
 import { businessTypes, getBusinessTypeById, getScenarioById } from '@/data/businessTypes';
 import { countries, getCountryById } from '@/data/countries';
 import { ROICalculator, ROIInputs, ROIResults as ROIResultsType } from '@/lib/roiCalculator';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Building2, Globe, BarChart3, DollarSign } from 'lucide-react';
 
 const formSchema = z.object({
   monthlyRevenue: z.number().min(1, 'Monthly revenue must be greater than 0'),
@@ -176,23 +176,23 @@ export function ROICalculatorForm() {
   if (!mounted) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Loading...</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Loading...</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -204,7 +204,7 @@ export function ROICalculatorForm() {
   if (!currentCountry || !currentBusinessType || !currentScenario) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Error Loading Data</CardTitle>
           </CardHeader>
@@ -222,34 +222,32 @@ export function ROICalculatorForm() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Business Setup Card */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <span className="text-lg">🎯</span>
-            </div>
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-t-lg">
+          <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-purple-600" />
             Business Setup
           </CardTitle>
-          <CardDescription className="text-purple-100">
+          <CardDescription className="text-slate-600">
             Select your business type and location for accurate calculations
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-6">
-          <div className="space-y-3">
-            <Label htmlFor="country" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <span className="text-blue-500">🌍</span>
+          <div className="space-y-2">
+            <Label htmlFor="country" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <Globe className="h-4 w-4 text-blue-600" />
               Country
             </Label>
             <CountrySelector
               value={selectedCountry}
               onValueChange={setSelectedCountry}
-              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+              className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
             />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="businessType" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <span className="text-green-500">🏢</span>
+          <div className="space-y-2">
+            <Label htmlFor="businessType" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-green-600" />
               Business Type
             </Label>
             <BusinessTypeSelector
@@ -262,30 +260,29 @@ export function ROICalculatorForm() {
                   setSelectedScenario(newBusinessType.scenarios[0].id);
                 }
               }}
-              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+              className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
             />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="scenario" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <span className="text-purple-500">📊</span>
+          <div className="space-y-2">
+            <Label htmlFor="scenario" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-purple-600" />
               Scenario
             </Label>
             <ScenarioSelector
               businessType={selectedBusinessType}
               value={selectedScenario}
               onValueChange={setSelectedScenario}
-              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
+              className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
             />
           </div>
 
-          <div className="space-y-3">
-            <Label htmlFor="timeframe" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <span className="text-orange-500">⏱️</span>
+          <div className="space-y-2">
+            <Label htmlFor="timeframe" className="text-sm font-medium text-slate-700">
               Time Frame
             </Label>
             <Select value={watchedValues.timeframe} onValueChange={(value) => setValue('timeframe', value as any)}>
-              <SelectTrigger className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors">
+              <SelectTrigger className="border-slate-200 focus:border-purple-500 focus:ring-purple-500">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -299,23 +296,21 @@ export function ROICalculatorForm() {
       </Card>
 
       {/* Financial Inputs Card */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-300">
-        <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-          <CardTitle className="text-xl font-bold flex items-center gap-2">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <span className="text-lg">💰</span>
-            </div>
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-lg">
+          <CardTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-green-600" />
             Financial Inputs
           </CardTitle>
-          <CardDescription className="text-green-100">
+          <CardDescription className="text-slate-600">
             Enter your business financial data for precise ROI analysis
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="monthlyRevenue" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="monthlyRevenue" className="text-sm font-medium text-slate-700">
                   Monthly Revenue ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -323,19 +318,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('monthlyRevenue', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="50,000"
                 />
                 {errors.monthlyRevenue && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.monthlyRevenue.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grossMargin" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="grossMargin" className="text-sm font-medium text-slate-700">
                   Gross Margin (%)
                 </Label>
                 <Input
@@ -345,19 +340,19 @@ export function ROICalculatorForm() {
                   min="0"
                   max="100"
                   {...register('grossMargin', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="75"
                 />
                 {errors.grossMargin && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.grossMargin.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="marketingBudget" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="marketingBudget" className="text-sm font-medium text-slate-700">
                   Marketing Budget ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -365,19 +360,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('marketingBudget', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="10,000"
                 />
                 {errors.marketingBudget && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.marketingBudget.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="operatingExpenses" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="operatingExpenses" className="text-sm font-medium text-slate-700">
                   Operating Expenses ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -385,19 +380,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('operatingExpenses', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="15,000"
                 />
                 {errors.operatingExpenses && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.operatingExpenses.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="employeeCosts" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="employeeCosts" className="text-sm font-medium text-slate-700">
                   Employee Costs ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -405,19 +400,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('employeeCosts', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="25,000"
                 />
                 {errors.employeeCosts && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.employeeCosts.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cac" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="cac" className="text-sm font-medium text-slate-700">
                   Customer Acquisition Cost ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -425,19 +420,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('cac', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="150"
                 />
                 {errors.cac && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.cac.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="averageOrderValue" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="averageOrderValue" className="text-sm font-medium text-slate-700">
                   Average Order Value ({currentCountry.currencySymbol})
                 </Label>
                 <Input
@@ -445,19 +440,19 @@ export function ROICalculatorForm() {
                   type="number"
                   step="0.01"
                   {...register('averageOrderValue', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="500"
                 />
                 {errors.averageOrderValue && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.averageOrderValue.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="churnRate" className="text-sm font-semibold text-slate-700">
+                <Label htmlFor="churnRate" className="text-sm font-medium text-slate-700">
                   Churn Rate (%)
                 </Label>
                 <Input
@@ -467,12 +462,12 @@ export function ROICalculatorForm() {
                   min="0"
                   max="100"
                   {...register('churnRate', { valueAsNumber: true })}
-                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  className="border-slate-200 focus:border-purple-500 focus:ring-purple-500"
                   placeholder="5"
                 />
                 {errors.churnRate && (
                   <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="text-red-500">⚠️</span>
+                    <AlertCircle className="h-4 w-4" />
                     {errors.churnRate.message}
                   </p>
                 )}
@@ -481,19 +476,19 @@ export function ROICalculatorForm() {
 
             {/* Validation Errors */}
             {validationErrors.length > 0 && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {validationErrors.map((error, index) => (
                   <div
                     key={index}
-                    className={`p-4 rounded-xl border-2 ${
+                    className={`p-4 rounded-lg border ${
                       error.severity === 'error'
                         ? 'bg-red-50 border-red-200 text-red-800'
                         : 'bg-yellow-50 border-yellow-200 text-yellow-800'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5" />
-                      <span className="text-sm font-semibold">{error.field}</span>
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">{error.field}</span>
                     </div>
                     <p className="text-sm mt-1">{error.message}</p>
                   </div>
@@ -502,9 +497,9 @@ export function ROICalculatorForm() {
             )}
 
             {isCalculating && (
-              <div className="flex items-center justify-center py-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
-                <Loader2 className="h-6 w-6 animate-spin mr-3 text-purple-600" />
-                <span className="text-lg font-semibold text-purple-800">Calculating your ROI...</span>
+              <div className="flex items-center justify-center py-4 bg-purple-50 rounded-lg border border-purple-200">
+                <Loader2 className="h-5 w-5 animate-spin mr-2 text-purple-600" />
+                <span className="text-purple-800 font-medium">Calculating your ROI...</span>
               </div>
             )}
           </form>
@@ -522,23 +517,23 @@ export function ROICalculatorForm() {
             scenario={currentScenario.name}
           />
         ) : (
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 to-white">
-            <CardHeader className="bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg text-center">
-              <CardTitle className="text-2xl font-bold">🚀 Your ROI Results</CardTitle>
-              <CardDescription className="text-slate-200">
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-slate-50 to-purple-50 rounded-t-lg text-center">
+              <CardTitle className="text-2xl font-bold text-slate-900">📊 Your ROI Results</CardTitle>
+              <CardDescription className="text-slate-600">
                 Professional analysis will appear here once you enter your data
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center py-16 text-slate-500">
                 <div className="text-center max-w-md">
-                  <div className="text-6xl mb-6">📊</div>
+                  <div className="text-6xl mb-6">📈</div>
                   <h3 className="text-xl font-semibold text-slate-700 mb-2">
                     Ready for Professional Analysis
                   </h3>
                   <p className="text-slate-600 leading-relaxed">
                     Fill in your business details above to get comprehensive ROI insights, 
-                    interactive charts, and actionable recommendations worth $10,000+ in consulting fees.
+                    interactive charts, and actionable recommendations.
                   </p>
                 </div>
               </div>
