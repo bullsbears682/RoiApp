@@ -44,10 +44,10 @@ export function ROIResults({ results, currency, countryName, businessType, scena
   }));
 
   const costBreakdownData = [
-    { name: 'Marketing', value: results.inputs.marketingBudget, color: COLORS.primary },
-    { name: 'Operating', value: results.inputs.operatingExpenses, color: COLORS.secondary },
-    { name: 'Employees', value: results.inputs.employeeCosts || 0, color: COLORS.accent },
-    { name: 'Taxes', value: results.taxAmount, color: COLORS.warning }
+    { name: 'Marketing', value: results.costBreakdown.marketing, color: COLORS.primary },
+    { name: 'Operating', value: results.costBreakdown.operations, color: COLORS.secondary },
+    { name: 'Employees', value: results.costBreakdown.employees, color: COLORS.accent },
+    { name: 'Taxes', value: results.costBreakdown.taxes, color: COLORS.warning }
   ].filter(item => item.value > 0);
 
   const getRiskColor = (impact: string) => {
