@@ -12,7 +12,6 @@ export default function HomePage() {
       <section className="relative overflow-hidden">
         {/* Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-800/20 to-pink-800/20" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="1"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40" />
         
         <div className="relative container mx-auto px-4 py-20 md:py-32">
           <div className="max-w-4xl mx-auto text-center">
@@ -86,59 +85,89 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {[
-              {
-                icon: <Zap className="h-8 w-8 text-yellow-500" />,
-                title: "Lightning Fast Analysis",
-                description: "Get comprehensive ROI insights in under 3 seconds. No more waiting, no more spreadsheets."
-              },
-              {
-                icon: <Globe className="h-8 w-8 text-blue-500" />,
-                title: "Global Tax Intelligence",
-                description: "Real-time tax calculations for 26 countries. Stay compliant, maximize profits."
-              },
-              {
-                icon: <TrendingUp className="h-8 w-8 text-green-500" />,
-                title: "AI-Powered Insights",
-                description: "Machine learning algorithms analyze 10M+ data points to give you actionable recommendations."
-              },
-              {
-                icon: <Shield className="h-8 w-8 text-purple-500" />,
-                title: "Bank-Grade Security",
-                description: "Your data is encrypted with military-grade security. We never store or share your information."
-              },
-              {
-                icon: <Users className="h-8 w-8 text-pink-500" />,
-                title: "Team Collaboration",
-                description: "Share calculations with your team. Export professional PDF reports for stakeholders."
-              },
-              {
-                icon: <BarChart3 className="h-8 w-8 text-indigo-500" />,
-                title: "Beautiful Visualizations",
-                description: "Interactive charts and graphs that make complex data instantly understandable."
-              }
-            ].map((feature, index) => (
-              <Card key={index} className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
-                <CardHeader className="pb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <CardTitle className="text-xl font-bold text-slate-900">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 leading-relaxed">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="h-8 w-8 text-yellow-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">Lightning Fast Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Get comprehensive ROI insights in under 3 seconds. No more waiting, no more spreadsheets.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Globe className="h-8 w-8 text-blue-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">Global Tax Intelligence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Real-time tax calculations for 26 countries. Stay compliant, maximize profits.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">AI-Powered Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Machine learning algorithms analyze 10M+ data points to give you actionable recommendations.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Shield className="h-8 w-8 text-purple-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">Bank-Grade Security</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Your data is encrypted with military-grade security. We never store or share your information.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="h-8 w-8 text-pink-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">Team Collaboration</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Share calculations with your team. Export professional PDF reports for stakeholders.</p>
+              </CardContent>
+            </Card>
+
+            <Card className="group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg hover:-translate-y-2">
+              <CardHeader className="pb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="h-8 w-8 text-indigo-500" />
+                </div>
+                <CardTitle className="text-xl font-bold text-slate-900">Beautiful Visualizations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-slate-600 leading-relaxed">Interactive charts and graphs that make complex data instantly understandable.</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Social Proof */}
           <div className="text-center">
             <p className="text-sm text-slate-500 mb-8">Trusted by teams at</p>
             <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-              {['Microsoft', 'Google', 'Amazon', 'Tesla', 'Apple', 'Meta'].map((company) => (
-                <div key={company} className="text-2xl font-bold text-slate-400">{company}</div>
-              ))}
+              <div className="text-2xl font-bold text-slate-400">Microsoft</div>
+              <div className="text-2xl font-bold text-slate-400">Google</div>
+              <div className="text-2xl font-bold text-slate-400">Amazon</div>
+              <div className="text-2xl font-bold text-slate-400">Tesla</div>
+              <div className="text-2xl font-bold text-slate-400">Apple</div>
+              <div className="text-2xl font-bold text-slate-400">Meta</div>
             </div>
           </div>
         </div>
@@ -179,7 +208,7 @@ export default function HomePage() {
             Ready to 10x Your ROI?
           </h2>
           <p className="text-xl text-purple-200 mb-8 max-w-2xl mx-auto">
-            Join thousands of smart business owners who've already optimized their profitability.
+            Join thousands of smart business owners who have already optimized their profitability.
           </p>
           <Button size="lg" className="bg-white text-purple-900 hover:bg-slate-100 h-12 px-8 text-lg font-semibold shadow-2xl">
             <a href="#calculator" className="flex items-center gap-2">
@@ -202,7 +231,7 @@ export default function HomePage() {
                 <span className="text-2xl font-bold">ROI Calculator Pro</span>
               </div>
               <p className="text-slate-400 mb-4 max-w-md leading-relaxed">
-                The world's most advanced ROI calculator. Built for businesses that demand accuracy, speed, and actionable insights.
+                The world&apos;s most advanced ROI calculator. Built for businesses that demand accuracy, speed, and actionable insights.
               </p>
             </div>
             
