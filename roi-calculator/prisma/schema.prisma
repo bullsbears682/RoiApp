@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  calculations Calculation[]
+  sessions     Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Calculation {
+  id          String   @id @default(cuid())
+  userId      String?
+  businessType String
+  scenario    String
+  country     String
+  currency    String
+  timeframe   String
+  inputs      Json
+  results     Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("calculations")
+}
+
+model BusinessType {
+  id          String @id @default(cuid())
+  name        String @unique
+  description String
+  icon        String
+  category    String
+  active      Boolean @default(true)
+
+  scenarios BusinessScenario[]
+
+  @@map("business_types")
+}
+
+model BusinessScenario {
+  id             String @id @default(cuid())
+  businessTypeId String
+  name           String
+  description    String
+  defaultInputs  Json
+  assumptions    Json
+  active         Boolean @default(true)
+
+  businessType BusinessType @relation(fields: [businessTypeId], references: [id], onDelete: Cascade)
+
+  @@map("business_scenarios")
+}
+
+model Country {
+  id           String  @id @default(cuid())
+  name         String  @unique
+  code         String  @unique
+  currency     String
+  currencySymbol String
+  taxRates     Json
+  vatRate      Float?
+  flag         String
+  active       Boolean @default(true)
+
+  @@map("countries")
+}
+
+model Analytics {
+  id               String   @id @default(cuid())
+  calculationsCount Int     @default(0)
+  uniqueUsers      Int     @default(0)
+  topBusinessTypes Json
+  topCountries     Json
+  date             DateTime @default(now())
+
+  @@map("analytics")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
