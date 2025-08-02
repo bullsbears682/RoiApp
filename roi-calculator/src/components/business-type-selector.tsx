@@ -2,14 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectLabel,
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue, 
+  SelectLabel, 
   SelectSeparator,
+  SelectGroup
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { businessTypes, businessCategories, getBusinessTypeById } from '@/data/businessTypes';
@@ -25,21 +26,31 @@ export function BusinessTypeSelector({ value, onValueChange, className }: Busine
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredBusinessTypes = useMemo(() => {
-    if (!searchQuery) return businessTypes;
+    if (!searchQuery.trim()) return businessTypes;
     
-    return businessTypes.filter(businessType => 
-      businessType.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      businessType.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      businessType.category.toLowerCase().includes(searchQuery.toLowerCase())
+    const query = searchQuery.toLowerCase();
+    return businessTypes.filter(
+      (type) =>
+        type.name.toLowerCase().includes(query) ||
+        type.description.toLowerCase().includes(query) ||
+        type.category.toLowerCase().includes(query)
     );
   }, [searchQuery]);
 
   const groupedBusinessTypes = useMemo(() => {
-    const grouped: Record<string, typeof businessTypes> = {};
+    const groups: Record<string, typeof businessTypes> = {};
+    
     businessCategories.forEach(category => {
-      grouped[category] = filteredBusinessTypes.filter(bt => bt.category === category);
+      groups[category] = [];
     });
-    return grouped;
+
+    filteredBusinessTypes.forEach(type => {
+      if (groups[type.category]) {
+        groups[type.category].push(type);
+      }
+    });
+
+    return groups;
   }, [filteredBusinessTypes]);
 
   const selectedBusinessType = getBusinessTypeById(value);
@@ -47,19 +58,15 @@ export function BusinessTypeSelector({ value, onValueChange, className }: Busine
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger className={cn("w-full", className)}>
-        <SelectValue>
-          {selectedBusinessType ? (
+        <SelectValue placeholder="Select business type">
+          {selectedBusinessType && (
             <div className="flex items-center gap-2">
-              <span className="text-lg">{selectedBusinessType.icon}</span>
-              <div>
-                <span className="font-medium">{selectedBusinessType.name}</span>
-                <span className="text-muted-foreground text-sm ml-2">
-                  ({selectedBusinessType.scenarios.length} scenarios)
-                </span>
-              </div>
+              <span>{selectedBusinessType.icon}</span>
+              <span>{selectedBusinessType.name}</span>
+              <span className="text-xs text-muted-foreground">
+                ({selectedBusinessType.scenarios.length} scenarios)
+              </span>
             </div>
-          ) : (
-            "Select a business type..."
           )}
         </SelectValue>
       </SelectTrigger>
@@ -79,7 +86,7 @@ export function BusinessTypeSelector({ value, onValueChange, className }: Busine
             if (types.length === 0) return null;
             
             return (
-              <div key={category}>
+              <SelectGroup key={category}>
                 <SelectLabel>{category}</SelectLabel>
                 {types.map((businessType) => (
                   <SelectItem key={businessType.id} value={businessType.id}>
@@ -98,12 +105,12 @@ export function BusinessTypeSelector({ value, onValueChange, className }: Busine
                   </SelectItem>
                 ))}
                 <SelectSeparator />
-              </div>
+              </SelectGroup>
             );
           })
         ) : (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            No business types found.
+            No business types found matching "{searchQuery}"
           </div>
         )}
       </SelectContent>
