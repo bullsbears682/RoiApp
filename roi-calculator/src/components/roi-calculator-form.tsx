@@ -222,22 +222,36 @@ export function ROICalculatorForm() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Business Setup Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Business Setup</CardTitle>
-          <CardDescription>Select your business type and location</CardDescription>
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <span className="text-lg">🎯</span>
+            </div>
+            Business Setup
+          </CardTitle>
+          <CardDescription className="text-purple-100">
+            Select your business type and location for accurate calculations
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
+        <CardContent className="space-y-6 p-6">
+          <div className="space-y-3">
+            <Label htmlFor="country" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-blue-500">🌍</span>
+              Country
+            </Label>
             <CountrySelector
               value={selectedCountry}
               onValueChange={setSelectedCountry}
+              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="businessType">Business Type</Label>
+          <div className="space-y-3">
+            <Label htmlFor="businessType" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-green-500">🏢</span>
+              Business Type
+            </Label>
             <BusinessTypeSelector
               value={selectedBusinessType}
               onValueChange={(value) => {
@@ -248,28 +262,36 @@ export function ROICalculatorForm() {
                   setSelectedScenario(newBusinessType.scenarios[0].id);
                 }
               }}
+              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="scenario">Scenario</Label>
+          <div className="space-y-3">
+            <Label htmlFor="scenario" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-purple-500">📊</span>
+              Scenario
+            </Label>
             <ScenarioSelector
               businessType={selectedBusinessType}
               value={selectedScenario}
               onValueChange={setSelectedScenario}
+              className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="timeframe">Time Frame</Label>
+          <div className="space-y-3">
+            <Label htmlFor="timeframe" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+              <span className="text-orange-500">⏱️</span>
+              Time Frame
+            </Label>
             <Select value={watchedValues.timeframe} onValueChange={(value) => setValue('timeframe', value as any)}>
-              <SelectTrigger>
+              <SelectTrigger className="border-2 border-slate-200 hover:border-purple-300 focus:border-purple-500 transition-colors">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="monthly">Monthly</SelectItem>
-                <SelectItem value="quarterly">Quarterly</SelectItem>
-                <SelectItem value="yearly">Yearly</SelectItem>
+                <SelectItem value="monthly">Monthly Analysis</SelectItem>
+                <SelectItem value="quarterly">Quarterly Analysis</SelectItem>
+                <SelectItem value="yearly">Yearly Analysis</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -277,29 +299,45 @@ export function ROICalculatorForm() {
       </Card>
 
       {/* Financial Inputs Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Financial Inputs</CardTitle>
-          <CardDescription>Enter your business financial data</CardDescription>
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-300">
+        <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+          <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <span className="text-lg">💰</span>
+            </div>
+            Financial Inputs
+          </CardTitle>
+          <CardDescription className="text-green-100">
+            Enter your business financial data for precise ROI analysis
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="monthlyRevenue">Monthly Revenue ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="monthlyRevenue" className="text-sm font-semibold text-slate-700">
+                  Monthly Revenue ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="monthlyRevenue"
                   type="number"
                   step="0.01"
                   {...register('monthlyRevenue', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="50,000"
                 />
                 {errors.monthlyRevenue && (
-                  <p className="text-sm text-red-600">{errors.monthlyRevenue.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.monthlyRevenue.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="grossMargin">Gross Margin (%)</Label>
+                <Label htmlFor="grossMargin" className="text-sm font-semibold text-slate-700">
+                  Gross Margin (%)
+                </Label>
                 <Input
                   id="grossMargin"
                   type="number"
@@ -307,79 +345,121 @@ export function ROICalculatorForm() {
                   min="0"
                   max="100"
                   {...register('grossMargin', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="75"
                 />
                 {errors.grossMargin && (
-                  <p className="text-sm text-red-600">{errors.grossMargin.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.grossMargin.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="marketingBudget">Marketing Budget ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="marketingBudget" className="text-sm font-semibold text-slate-700">
+                  Marketing Budget ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="marketingBudget"
                   type="number"
                   step="0.01"
                   {...register('marketingBudget', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="10,000"
                 />
                 {errors.marketingBudget && (
-                  <p className="text-sm text-red-600">{errors.marketingBudget.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.marketingBudget.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="operatingExpenses">Operating Expenses ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="operatingExpenses" className="text-sm font-semibold text-slate-700">
+                  Operating Expenses ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="operatingExpenses"
                   type="number"
                   step="0.01"
                   {...register('operatingExpenses', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="15,000"
                 />
                 {errors.operatingExpenses && (
-                  <p className="text-sm text-red-600">{errors.operatingExpenses.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.operatingExpenses.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="employeeCosts">Employee Costs ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="employeeCosts" className="text-sm font-semibold text-slate-700">
+                  Employee Costs ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="employeeCosts"
                   type="number"
                   step="0.01"
                   {...register('employeeCosts', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="25,000"
                 />
                 {errors.employeeCosts && (
-                  <p className="text-sm text-red-600">{errors.employeeCosts.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.employeeCosts.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cac">Customer Acquisition Cost ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="cac" className="text-sm font-semibold text-slate-700">
+                  Customer Acquisition Cost ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="cac"
                   type="number"
                   step="0.01"
                   {...register('cac', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="150"
                 />
                 {errors.cac && (
-                  <p className="text-sm text-red-600">{errors.cac.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.cac.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="averageOrderValue">Average Order Value ({currentCountry.currencySymbol})</Label>
+                <Label htmlFor="averageOrderValue" className="text-sm font-semibold text-slate-700">
+                  Average Order Value ({currentCountry.currencySymbol})
+                </Label>
                 <Input
                   id="averageOrderValue"
                   type="number"
                   step="0.01"
                   {...register('averageOrderValue', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="500"
                 />
                 {errors.averageOrderValue && (
-                  <p className="text-sm text-red-600">{errors.averageOrderValue.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.averageOrderValue.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="churnRate">Churn Rate (%)</Label>
+                <Label htmlFor="churnRate" className="text-sm font-semibold text-slate-700">
+                  Churn Rate (%)
+                </Label>
                 <Input
                   id="churnRate"
                   type="number"
@@ -387,28 +467,33 @@ export function ROICalculatorForm() {
                   min="0"
                   max="100"
                   {...register('churnRate', { valueAsNumber: true })}
+                  className="border-2 border-slate-200 hover:border-green-300 focus:border-green-500 transition-colors h-12 text-lg font-semibold"
+                  placeholder="5"
                 />
                 {errors.churnRate && (
-                  <p className="text-sm text-red-600">{errors.churnRate.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="text-red-500">⚠️</span>
+                    {errors.churnRate.message}
+                  </p>
                 )}
               </div>
             </div>
 
             {/* Validation Errors */}
             {validationErrors.length > 0 && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {validationErrors.map((error, index) => (
                   <div
                     key={index}
-                    className={`p-3 rounded-md ${
+                    className={`p-4 rounded-xl border-2 ${
                       error.severity === 'error'
-                        ? 'bg-red-50 border border-red-200 text-red-700'
-                        : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
+                        ? 'bg-red-50 border-red-200 text-red-800'
+                        : 'bg-yellow-50 border-yellow-200 text-yellow-800'
                     }`}
                   >
-                    <div className="flex items-center">
-                      <AlertCircle className="h-4 w-4 mr-2" />
-                      <span className="text-sm font-medium">{error.field}</span>
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-5 w-5" />
+                      <span className="text-sm font-semibold">{error.field}</span>
                     </div>
                     <p className="text-sm mt-1">{error.message}</p>
                   </div>
@@ -417,9 +502,9 @@ export function ROICalculatorForm() {
             )}
 
             {isCalculating && (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                <span className="text-sm text-muted-foreground">Calculating ROI...</span>
+              <div className="flex items-center justify-center py-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-2 border-purple-200">
+                <Loader2 className="h-6 w-6 animate-spin mr-3 text-purple-600" />
+                <span className="text-lg font-semibold text-purple-800">Calculating your ROI...</span>
               </div>
             )}
           </form>
@@ -437,16 +522,24 @@ export function ROICalculatorForm() {
             scenario={currentScenario.name}
           />
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>ROI Results</CardTitle>
-              <CardDescription>Your calculation results will appear here</CardDescription>
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 to-white">
+            <CardHeader className="bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg text-center">
+              <CardTitle className="text-2xl font-bold">🚀 Your ROI Results</CardTitle>
+              <CardDescription className="text-slate-200">
+                Professional analysis will appear here once you enter your data
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center py-12 text-muted-foreground">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">📊</div>
-                  <p>Enter your financial data above to see ROI analysis</p>
+              <div className="flex items-center justify-center py-16 text-slate-500">
+                <div className="text-center max-w-md">
+                  <div className="text-6xl mb-6">📊</div>
+                  <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                    Ready for Professional Analysis
+                  </h3>
+                  <p className="text-slate-600 leading-relaxed">
+                    Fill in your business details above to get comprehensive ROI insights, 
+                    interactive charts, and actionable recommendations worth $10,000+ in consulting fees.
+                  </p>
                 </div>
               </div>
             </CardContent>
