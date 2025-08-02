@@ -5,9 +5,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BusinessTypeSelector } from '@/components/business-type-selector';
 import { CountrySelector } from '@/components/country-selector';
 import { ScenarioSelector } from '@/components/scenario-selector';
@@ -15,33 +16,35 @@ import { ROIResults } from '@/components/roi-results';
 import { businessTypes, getBusinessTypeById, getScenarioById } from '@/data/businessTypes';
 import { countries, getCountryById } from '@/data/countries';
 import { ROICalculator, ROIInputs, ROIResults as ROIResultsType } from '@/lib/roiCalculator';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 const formSchema = z.object({
-  country: z.string().min(1, 'Please select a country'),
-  businessType: z.string().min(1, 'Please select a business type'),
-  scenario: z.string().min(1, 'Please select a scenario'),
   monthlyRevenue: z.number().min(1, 'Monthly revenue must be greater than 0'),
-  grossMargin: z.number().min(0).max(100, 'Gross margin must be between 0% and 100%'),
-  marketingBudget: z.number().min(0, 'Marketing budget cannot be negative'),
-  operatingExpenses: z.number().min(0, 'Operating expenses cannot be negative'),
-  employeeCosts: z.number().min(0, 'Employee costs cannot be negative'),
-  cac: z.number().optional(),
-  averageOrderValue: z.number().optional(),
-  churnRate: z.number().optional(),
-  growthRate: z.number().min(0, 'Growth rate cannot be negative'),
-  projectionMonths: z.number().min(1).max(60, 'Projection period must be between 1-60 months'),
-  initialInvestment: z.number().optional(),
+  grossMargin: z.number().min(0).max(100, 'Gross margin must be between 0 and 100'),
+  marketingBudget: z.number().min(0, 'Marketing budget must be 0 or greater'),
+  operatingExpenses: z.number().min(0, 'Operating expenses must be 0 or greater'),
+  employeeCosts: z.number().min(0, 'Employee costs must be 0 or greater').optional(),
+  cac: z.number().min(0, 'Customer acquisition cost must be 0 or greater').optional(),
+  averageOrderValue: z.number().min(0, 'Average order value must be 0 or greater').optional(),
+  churnRate: z.number().min(0).max(100, 'Churn rate must be between 0 and 100').optional(),
+  timeframe: z.enum(['monthly', 'quarterly', 'yearly']),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export function ROICalculatorForm() {
+  const [mounted, setMounted] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('us');
   const [selectedBusinessType, setSelectedBusinessType] = useState<string>('startup-tech');
   const [selectedScenario, setSelectedScenario] = useState<string>('saas-mvp');
   const [results, setResults] = useState<ROIResultsType | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Array<{field: string, message: string, severity: 'error' | 'warning'}>>([]);
+
+  // Ensure component is mounted before rendering complex logic
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {
     register,
@@ -53,363 +56,398 @@ export function ROICalculatorForm() {
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      country: 'us',
-      businessType: 'startup-tech',
-      scenario: 'saas-mvp',
       monthlyRevenue: 5000,
       grossMargin: 85,
       marketingBudget: 2000,
       operatingExpenses: 3000,
       employeeCosts: 8000,
-      growthRate: 15,
-      projectionMonths: 12,
+      timeframe: 'monthly'
     }
   });
 
   const watchedValues = watch();
 
-  // Get current selections
-  const currentCountry = useMemo(() => getCountryById(selectedCountry), [selectedCountry]);
-  const currentBusinessType = useMemo(() => getBusinessTypeById(selectedBusinessType), [selectedBusinessType]);
+  // Memoized data with fallbacks
+  const currentCountry = useMemo(() => {
+    try {
+      return getCountryById(selectedCountry) || countries[0];
+    } catch (error) {
+      console.error('Error getting country:', error);
+      return countries[0];
+    }
+  }, [selectedCountry]);
+
+  const currentBusinessType = useMemo(() => {
+    try {
+      return getBusinessTypeById(selectedBusinessType) || businessTypes[0];
+    } catch (error) {
+      console.error('Error getting business type:', error);
+      return businessTypes[0];
+    }
+  }, [selectedBusinessType]);
+
   const currentScenario = useMemo(() => {
-    if (!currentBusinessType) return null;
-    return getScenarioById(selectedBusinessType, selectedScenario);
+    try {
+      return getScenarioById(selectedBusinessType, selectedScenario) || 
+             currentBusinessType?.scenarios[0];
+    } catch (error) {
+      console.error('Error getting scenario:', error);
+      return currentBusinessType?.scenarios[0];
+    }
   }, [selectedBusinessType, selectedScenario, currentBusinessType]);
 
   // Update form when scenario changes
   useEffect(() => {
-    if (currentScenario) {
-      const defaults = currentScenario.defaultInputs;
-      setValue('monthlyRevenue', defaults.monthlyRevenue);
-      setValue('grossMargin', defaults.grossMargin);
-      setValue('marketingBudget', defaults.marketingBudget);
-      setValue('operatingExpenses', defaults.operatingExpenses);
-      setValue('employeeCosts', defaults.employeeCosts || 0);
-      setValue('cac', defaults.cac);
-      setValue('averageOrderValue', defaults.averageOrderValue);
-      setValue('churnRate', defaults.churnRate);
-      setValue('growthRate', currentScenario.assumptions.growthRate);
+    if (!currentScenario || !mounted) return;
+    
+    try {
+      const { defaultInputs } = currentScenario;
+      setValue('monthlyRevenue', defaultInputs.monthlyRevenue);
+      setValue('grossMargin', defaultInputs.grossMargin);
+      setValue('marketingBudget', defaultInputs.marketingBudget);
+      setValue('operatingExpenses', defaultInputs.operatingExpenses);
+      setValue('employeeCosts', defaultInputs.employeeCosts || 0);
+      setValue('cac', defaultInputs.cac || 0);
+      setValue('averageOrderValue', defaultInputs.averageOrderValue || 0);
+      setValue('churnRate', defaultInputs.churnRate || 0);
+    } catch (error) {
+      console.error('Error updating form values:', error);
     }
-  }, [currentScenario, setValue]);
+  }, [currentScenario, setValue, mounted]);
 
-  // Real-time calculation
+  // Real-time calculation with error handling
   useEffect(() => {
-    if (currentCountry && currentScenario && watchedValues.monthlyRevenue > 0) {
-      const inputs: ROIInputs = {
-        monthlyRevenue: watchedValues.monthlyRevenue,
-        grossMargin: watchedValues.grossMargin,
-        marketingBudget: watchedValues.marketingBudget,
-        operatingExpenses: watchedValues.operatingExpenses,
-        employeeCosts: watchedValues.employeeCosts,
-        cac: watchedValues.cac,
-        averageOrderValue: watchedValues.averageOrderValue,
-        churnRate: watchedValues.churnRate,
-        timeframe: 'monthly',
-        projectionMonths: watchedValues.projectionMonths,
-        growthRate: watchedValues.growthRate,
-        country: selectedCountry,
-        businessType: selectedBusinessType,
-        scenario: selectedScenario,
-        initialInvestment: watchedValues.initialInvestment,
-      };
+    if (!watchedValues || !currentCountry || !currentScenario || !mounted) return;
 
+    const calculateROI = async () => {
       try {
+        setIsCalculating(true);
+        setValidationErrors([]);
+
+        const inputs: ROIInputs = {
+          monthlyRevenue: Number(watchedValues.monthlyRevenue) || 0,
+          grossMargin: Number(watchedValues.grossMargin) || 0,
+          marketingBudget: Number(watchedValues.marketingBudget) || 0,
+          operatingExpenses: Number(watchedValues.operatingExpenses) || 0,
+          employeeCosts: Number(watchedValues.employeeCosts) || 0,
+          cac: Number(watchedValues.cac) || undefined,
+          averageOrderValue: Number(watchedValues.averageOrderValue) || undefined,
+          churnRate: Number(watchedValues.churnRate) || undefined,
+          timeframe: watchedValues.timeframe || 'monthly',
+          projectionMonths: 12,
+          growthRate: currentScenario.assumptions.growthRate,
+          country: selectedCountry,
+          businessType: selectedBusinessType,
+          scenario: selectedScenario,
+          initialInvestment: Number(watchedValues.marketingBudget) + Number(watchedValues.operatingExpenses),
+        };
+
         const calculator = new ROICalculator(inputs, currentCountry, currentScenario);
         const validationErrors = calculator.validateInputs();
-        setValidationErrors(validationErrors);
-
-        if (!validationErrors.some(e => e.severity === 'error')) {
-          const calculationResults = calculator.calculate();
-          setResults(calculationResults);
-        } else {
-          setResults(null);
+        
+        if (validationErrors.length > 0) {
+          setValidationErrors(validationErrors);
         }
+
+        const calculationResults = calculator.calculate();
+        setResults(calculationResults);
       } catch (error) {
-        console.error('Calculation error:', error);
-        setResults(null);
+        console.error('ROI calculation error:', error);
+        setValidationErrors([{
+          field: 'general',
+          message: 'Error calculating ROI. Please check your inputs.',
+          severity: 'error'
+        }]);
+      } finally {
+        setIsCalculating(false);
       }
-    }
-  }, [watchedValues, currentCountry, currentScenario, selectedCountry, selectedBusinessType, selectedScenario]);
+    };
+
+    const timeoutId = setTimeout(calculateROI, 300);
+    return () => clearTimeout(timeoutId);
+  }, [watchedValues, currentCountry, currentScenario, selectedCountry, selectedBusinessType, selectedScenario, mounted]);
 
   const onSubmit = async (data: FormData) => {
-    setIsCalculating(true);
-    // Simulate calculation time for better UX
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsCalculating(false);
+    // Form submission is handled by real-time calculation
+    console.log('Form submitted:', data);
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Input Form */}
-      <div className="space-y-6">
+  // Show loading state until mounted
+  if (!mounted) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Business Setup</CardTitle>
-            <CardDescription>
-              Select your country, business type, and scenario to get started.
-            </CardDescription>
+            <CardTitle>Loading...</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="country">Country</Label>
-              <CountrySelector
-                value={selectedCountry}
-                onValueChange={(value) => {
-                  setSelectedCountry(value);
-                  setValue('country', value);
-                }}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="businessType">Business Type</Label>
-              <BusinessTypeSelector
-                value={selectedBusinessType}
-                onValueChange={(value) => {
-                  setSelectedBusinessType(value);
-                  setValue('businessType', value);
-                  // Reset scenario when business type changes
-                  const newBusinessType = getBusinessTypeById(value);
-                  if (newBusinessType && newBusinessType.scenarios.length > 0) {
-                    const firstScenario = newBusinessType.scenarios[0].id;
-                    setSelectedScenario(firstScenario);
-                    setValue('scenario', firstScenario);
-                  }
-                }}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="scenario">Scenario</Label>
-              <ScenarioSelector
-                businessType={selectedBusinessType}
-                value={selectedScenario}
-                onValueChange={(value) => {
-                  setSelectedScenario(value);
-                  setValue('scenario', value);
-                }}
-              />
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader>
-            <CardTitle>Financial Inputs</CardTitle>
-            <CardDescription>
-              Enter your business financial metrics. Values update automatically based on your selected scenario.
-            </CardDescription>
+            <CardTitle>Loading...</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="monthlyRevenue">
-                    Monthly Revenue ({currentCountry?.currencySymbol})
-                  </Label>
-                  <Input
-                    id="monthlyRevenue"
-                    type="number"
-                    {...register('monthlyRevenue', { valueAsNumber: true })}
-                    className={errors.monthlyRevenue ? 'border-destructive' : ''}
-                  />
-                  {errors.monthlyRevenue && (
-                    <p className="text-sm text-destructive mt-1">{errors.monthlyRevenue.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="grossMargin">Gross Margin (%)</Label>
-                  <Input
-                    id="grossMargin"
-                    type="number"
-                    step="0.1"
-                    {...register('grossMargin', { valueAsNumber: true })}
-                    className={errors.grossMargin ? 'border-destructive' : ''}
-                  />
-                  {errors.grossMargin && (
-                    <p className="text-sm text-destructive mt-1">{errors.grossMargin.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="marketingBudget">
-                    Marketing Budget ({currentCountry?.currencySymbol})
-                  </Label>
-                  <Input
-                    id="marketingBudget"
-                    type="number"
-                    {...register('marketingBudget', { valueAsNumber: true })}
-                    className={errors.marketingBudget ? 'border-destructive' : ''}
-                  />
-                  {errors.marketingBudget && (
-                    <p className="text-sm text-destructive mt-1">{errors.marketingBudget.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="operatingExpenses">
-                    Operating Expenses ({currentCountry?.currencySymbol})
-                  </Label>
-                  <Input
-                    id="operatingExpenses"
-                    type="number"
-                    {...register('operatingExpenses', { valueAsNumber: true })}
-                    className={errors.operatingExpenses ? 'border-destructive' : ''}
-                  />
-                  {errors.operatingExpenses && (
-                    <p className="text-sm text-destructive mt-1">{errors.operatingExpenses.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="employeeCosts">
-                    Employee Costs ({currentCountry?.currencySymbol})
-                  </Label>
-                  <Input
-                    id="employeeCosts"
-                    type="number"
-                    {...register('employeeCosts', { valueAsNumber: true })}
-                    className={errors.employeeCosts ? 'border-destructive' : ''}
-                  />
-                  {errors.employeeCosts && (
-                    <p className="text-sm text-destructive mt-1">{errors.employeeCosts.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="growthRate">Monthly Growth Rate (%)</Label>
-                  <Input
-                    id="growthRate"
-                    type="number"
-                    step="0.1"
-                    {...register('growthRate', { valueAsNumber: true })}
-                    className={errors.growthRate ? 'border-destructive' : ''}
-                  />
-                  {errors.growthRate && (
-                    <p className="text-sm text-destructive mt-1">{errors.growthRate.message}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Optional Customer Metrics */}
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Customer Metrics (Optional)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="cac">
-                      CAC ({currentCountry?.currencySymbol})
-                    </Label>
-                    <Input
-                      id="cac"
-                      type="number"
-                      {...register('cac', { valueAsNumber: true })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="averageOrderValue">
-                      Avg Order Value ({currentCountry?.currencySymbol})
-                    </Label>
-                    <Input
-                      id="averageOrderValue"
-                      type="number"
-                      {...register('averageOrderValue', { valueAsNumber: true })}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="churnRate">Monthly Churn Rate (%)</Label>
-                    <Input
-                      id="churnRate"
-                      type="number"
-                      step="0.1"
-                      {...register('churnRate', { valueAsNumber: true })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Projection Settings */}
-              <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Projection Settings</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="projectionMonths">Projection Period (Months)</Label>
-                    <Input
-                      id="projectionMonths"
-                      type="number"
-                      min="1"
-                      max="60"
-                      {...register('projectionMonths', { valueAsNumber: true })}
-                      className={errors.projectionMonths ? 'border-destructive' : ''}
-                    />
-                    {errors.projectionMonths && (
-                      <p className="text-sm text-destructive mt-1">{errors.projectionMonths.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor="initialInvestment">
-                      Initial Investment ({currentCountry?.currencySymbol}) (Optional)
-                    </Label>
-                    <Input
-                      id="initialInvestment"
-                      type="number"
-                      {...register('initialInvestment', { valueAsNumber: true })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Validation Errors */}
-              {validationErrors.length > 0 && (
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">Validation Messages</h4>
-                  <div className="space-y-2">
-                    {validationErrors.map((error, index) => (
-                      <div
-                        key={index}
-                        className={`text-sm p-2 rounded ${
-                          error.severity === 'error'
-                            ? 'bg-destructive/10 text-destructive'
-                            : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
-                        }`}
-                      >
-                        <strong>{error.field}:</strong> {error.message}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </form>
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
           </CardContent>
         </Card>
       </div>
+    );
+  }
 
-      {/* Results */}
-      <div>
+  // Show error state if data is not available
+  if (!currentCountry || !currentBusinessType || !currentScenario) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Error Loading Data</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8 text-red-600">
+              <AlertCircle className="h-8 w-8 mr-2" />
+              <span>Unable to load calculator data. Please refresh the page.</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Business Setup Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Setup</CardTitle>
+          <CardDescription>Select your business type and location</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="country">Country</Label>
+            <CountrySelector
+              value={selectedCountry}
+              onValueChange={setSelectedCountry}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="businessType">Business Type</Label>
+            <BusinessTypeSelector
+              value={selectedBusinessType}
+              onValueChange={(value) => {
+                setSelectedBusinessType(value);
+                // Reset scenario to first available when business type changes
+                const newBusinessType = getBusinessTypeById(value);
+                if (newBusinessType?.scenarios[0]) {
+                  setSelectedScenario(newBusinessType.scenarios[0].id);
+                }
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="scenario">Scenario</Label>
+            <ScenarioSelector
+              businessType={selectedBusinessType}
+              value={selectedScenario}
+              onValueChange={setSelectedScenario}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="timeframe">Time Frame</Label>
+            <Select value={watchedValues.timeframe} onValueChange={(value) => setValue('timeframe', value as any)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="yearly">Yearly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Financial Inputs Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Financial Inputs</CardTitle>
+          <CardDescription>Enter your business financial data</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="monthlyRevenue">Monthly Revenue ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="monthlyRevenue"
+                  type="number"
+                  step="0.01"
+                  {...register('monthlyRevenue', { valueAsNumber: true })}
+                />
+                {errors.monthlyRevenue && (
+                  <p className="text-sm text-red-600">{errors.monthlyRevenue.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grossMargin">Gross Margin (%)</Label>
+                <Input
+                  id="grossMargin"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  {...register('grossMargin', { valueAsNumber: true })}
+                />
+                {errors.grossMargin && (
+                  <p className="text-sm text-red-600">{errors.grossMargin.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="marketingBudget">Marketing Budget ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="marketingBudget"
+                  type="number"
+                  step="0.01"
+                  {...register('marketingBudget', { valueAsNumber: true })}
+                />
+                {errors.marketingBudget && (
+                  <p className="text-sm text-red-600">{errors.marketingBudget.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="operatingExpenses">Operating Expenses ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="operatingExpenses"
+                  type="number"
+                  step="0.01"
+                  {...register('operatingExpenses', { valueAsNumber: true })}
+                />
+                {errors.operatingExpenses && (
+                  <p className="text-sm text-red-600">{errors.operatingExpenses.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="employeeCosts">Employee Costs ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="employeeCosts"
+                  type="number"
+                  step="0.01"
+                  {...register('employeeCosts', { valueAsNumber: true })}
+                />
+                {errors.employeeCosts && (
+                  <p className="text-sm text-red-600">{errors.employeeCosts.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cac">Customer Acquisition Cost ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="cac"
+                  type="number"
+                  step="0.01"
+                  {...register('cac', { valueAsNumber: true })}
+                />
+                {errors.cac && (
+                  <p className="text-sm text-red-600">{errors.cac.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="averageOrderValue">Average Order Value ({currentCountry.currencySymbol})</Label>
+                <Input
+                  id="averageOrderValue"
+                  type="number"
+                  step="0.01"
+                  {...register('averageOrderValue', { valueAsNumber: true })}
+                />
+                {errors.averageOrderValue && (
+                  <p className="text-sm text-red-600">{errors.averageOrderValue.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="churnRate">Churn Rate (%)</Label>
+                <Input
+                  id="churnRate"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  {...register('churnRate', { valueAsNumber: true })}
+                />
+                {errors.churnRate && (
+                  <p className="text-sm text-red-600">{errors.churnRate.message}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Validation Errors */}
+            {validationErrors.length > 0 && (
+              <div className="space-y-2">
+                {validationErrors.map((error, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-md ${
+                      error.severity === 'error'
+                        ? 'bg-red-50 border border-red-200 text-red-700'
+                        : 'bg-yellow-50 border border-yellow-200 text-yellow-700'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      <span className="text-sm font-medium">{error.field}</span>
+                    </div>
+                    <p className="text-sm mt-1">{error.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {isCalculating && (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                <span className="text-sm text-muted-foreground">Calculating ROI...</span>
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Results Display */}
+      <div className="lg:col-span-2">
         {results ? (
-          <ROIResults 
-            results={results} 
-            currency={currentCountry?.currency || 'USD'}
-            countryName={currentCountry?.name || 'United States'}
-            businessType={currentBusinessType?.name || 'Business'}
-            scenario={currentScenario?.name || 'Scenario'}
+          <ROIResults
+            results={results}
+            currency={currentCountry.currency}
+            countryName={currentCountry.name}
+            businessType={currentBusinessType.name}
+            scenario={currentScenario.name}
           />
         ) : (
           <Card>
-            <CardContent className="flex items-center justify-center h-96">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📊</span>
+            <CardHeader>
+              <CardTitle>ROI Results</CardTitle>
+              <CardDescription>Your calculation results will appear here</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center py-12 text-muted-foreground">
+                <div className="text-center">
+                  <div className="text-4xl mb-4">📊</div>
+                  <p>Enter your financial data above to see ROI analysis</p>
                 </div>
-                <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                  Ready to Calculate ROI
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Enter your business details to see comprehensive ROI analysis
-                </p>
               </div>
             </CardContent>
           </Card>

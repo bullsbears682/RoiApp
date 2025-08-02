@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 // import { AuthProvider } from "@/contexts/auth-context";
-import { Header } from "@/components/header";
+// import { Header } from "@/components/header"; // Header also commented out as it uses AuthProvider
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,12 +33,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <title>ROI Calculator Pro</title>
+      </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        {/* Temporarily disabled AuthProvider for debugging */}
-        {/* <AuthProvider> */}
-          {/* <Header /> */}
-          {children}
-        {/* </AuthProvider> */}
+        <main>
+          {/* Temporarily disabled AuthProvider for debugging */}
+          {/* <AuthProvider> */}
+            {/* <Header /> */}
+            {children}
+          {/* </AuthProvider> */}
+        </main>
       </body>
     </html>
   );
