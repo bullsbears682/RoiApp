@@ -7,33 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">R</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">ROI Calculator Pro</h1>
-                <p className="text-sm text-muted-foreground">Professional Business ROI Analysis</p>
-              </div>
-            </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <a href="#calculator" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Calculator
-              </a>
-              <a href="#scenarios" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                Scenarios
-              </a>
-              <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                About
-              </a>
-            </nav>
-          </div>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className="py-12 md:py-20">

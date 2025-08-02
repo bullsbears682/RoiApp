@@ -19,6 +19,8 @@ import {
 import { ROIResults as ROIResultsType, formatROIResults } from '@/lib/roiCalculator';
 import { formatCurrency } from '@/data/countries';
 import { cn } from '@/lib/utils';
+import { exportToPDF } from '@/lib/pdf-export';
+import { useAuth } from '@/contexts/auth-context';
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -55,6 +57,8 @@ const COLORS = {
 
 export function ROIResults({ results, currency, countryName, businessType, scenario }: ROIResultsProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'projections' | 'breakdown' | 'insights'>('overview');
+  const [isExporting, setIsExporting] = useState(false);
+  const { user } = useAuth();
   
   const formattedResults = formatROIResults(results, currency);
   
@@ -90,6 +94,32 @@ export function ROIResults({ results, currency, countryName, businessType, scena
     return 'text-red-600';
   };
 
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      await exportToPDF({
+        results,
+        currency,
+        countryName,
+        businessType,
+        scenario,
+        userEmail: user?.email,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleEmailResults = async () => {
+    // For now, we'll just trigger the PDF export
+    // In a real implementation, you'd send this to an email API
+    await handleExportPDF();
+    alert('PDF has been downloaded. You can now email it manually.');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -103,13 +133,23 @@ export function ROIResults({ results, currency, countryName, businessType, scena
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleEmailResults}
+                disabled={isExporting}
+              >
                 <Mail className="h-4 w-4 mr-2" />
                 Email Results
               </Button>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExportPDF}
+                disabled={isExporting}
+              >
                 <Download className="h-4 w-4 mr-2" />
-                Export PDF
+                {isExporting ? 'Exporting...' : 'Export PDF'}
               </Button>
             </div>
           </div>
