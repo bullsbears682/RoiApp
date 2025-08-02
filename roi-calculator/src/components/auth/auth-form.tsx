@@ -46,9 +46,12 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const schema = mode === 'login' ? loginSchema : signupSchema;
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
-    resolver: zodResolver(schema),
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const signupForm = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
   });
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
@@ -73,7 +76,11 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
       }
 
       setSuccess(result.message);
-      reset();
+      if (mode === 'login') {
+        loginForm.reset();
+      } else {
+        signupForm.reset();
+      }
       
       if (onSuccess) {
         onSuccess(result.user);
@@ -103,23 +110,23 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={mode === 'login' ? loginForm.handleSubmit(onSubmit) : signupForm.handleSubmit(onSubmit)} className="space-y-4">
           {mode === 'signup' && (
             <div className="space-y-2">
               <Label htmlFor="name">Name (Optional)</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Your full name"
-                {...register('name')}
-                className={cn(errors.name && 'border-red-500')}
-              />
-              {errors.name && (
-                <p className="text-sm text-red-500 flex items-center">
-                  <XCircle className="h-4 w-4 mr-1" />
-                  {errors.name.message}
-                </p>
-              )}
+                              <Input
+                  id="name"
+                  type="text"
+                  placeholder="Your full name"
+                  {...signupForm.register('name')}
+                  className={cn(signupForm.formState.errors.name && 'border-red-500')}
+                />
+                {signupForm.formState.errors.name && (
+                  <p className="text-sm text-red-500 flex items-center">
+                    <XCircle className="h-4 w-4 mr-1" />
+                    {signupForm.formState.errors.name.message}
+                  </p>
+                )}
             </div>
           )}
 
@@ -129,13 +136,13 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
               id="email"
               type="email"
               placeholder="your@email.com"
-              {...register('email')}
-              className={cn(errors.email && 'border-red-500')}
+              {...(mode === 'login' ? loginForm.register('email') : signupForm.register('email'))}
+              className={cn((mode === 'login' ? loginForm.formState.errors.email : signupForm.formState.errors.email) && 'border-red-500')}
             />
-            {errors.email && (
+            {(mode === 'login' ? loginForm.formState.errors.email : signupForm.formState.errors.email) && (
               <p className="text-sm text-red-500 flex items-center">
                 <XCircle className="h-4 w-4 mr-1" />
-                {errors.email.message}
+                {(mode === 'login' ? loginForm.formState.errors.email : signupForm.formState.errors.email)?.message}
               </p>
             )}
           </div>
@@ -143,33 +150,33 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                {...register('password')}
-                className={cn(errors.password && 'border-red-500', 'pr-10')}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-red-500 flex items-center">
-                <XCircle className="h-4 w-4 mr-1" />
-                {errors.password.message}
-              </p>
-            )}
+                              <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  {...(mode === 'login' ? loginForm.register('password') : signupForm.register('password'))}
+                  className={cn((mode === 'login' ? loginForm.formState.errors.password : signupForm.formState.errors.password) && 'border-red-500', 'pr-10')}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {(mode === 'login' ? loginForm.formState.errors.password : signupForm.formState.errors.password) && (
+                <p className="text-sm text-red-500 flex items-center">
+                  <XCircle className="h-4 w-4 mr-1" />
+                  {(mode === 'login' ? loginForm.formState.errors.password : signupForm.formState.errors.password)?.message}
+                </p>
+              )}
           </div>
 
           {mode === 'signup' && (
@@ -180,8 +187,8 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
                   id="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm your password"
-                  {...register('confirmPassword')}
-                  className={cn(errors.confirmPassword && 'border-red-500', 'pr-10')}
+                  {...signupForm.register('confirmPassword')}
+                  className={cn(signupForm.formState.errors.confirmPassword && 'border-red-500', 'pr-10')}
                 />
                 <Button
                   type="button"
@@ -197,10 +204,10 @@ export function AuthForm({ mode, onSuccess, onModeChange }: AuthFormProps) {
                   )}
                 </Button>
               </div>
-              {errors.confirmPassword && (
+              {signupForm.formState.errors.confirmPassword && (
                 <p className="text-sm text-red-500 flex items-center">
                   <XCircle className="h-4 w-4 mr-1" />
-                  {errors.confirmPassword.message}
+                  {signupForm.formState.errors.confirmPassword.message}
                 </p>
               )}
             </div>

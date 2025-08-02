@@ -5,7 +5,6 @@ const nextConfig = {
   
   // Experimental features
   experimental: {
-    // Enable server components
     serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs', 'jsonwebtoken'],
   },
 
