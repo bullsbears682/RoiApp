@@ -3,6 +3,7 @@ import { ROICalculatorForm } from '@/components/roi-calculator-form';
 import { BusinessTypeSelector } from '@/components/business-type-selector';
 import { CountrySelector } from '@/components/country-selector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 export default function HomePage() {
   return (
@@ -21,17 +22,11 @@ export default function HomePage() {
               and actionable insights for 35+ business types across 25+ countries.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="#calculator" 
-                className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                Start Calculating
+              <a href="#calculator" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2">
+                Get Started
               </a>
-              <a 
-                href="#scenarios" 
-                className="inline-flex items-center justify-center px-8 py-3 border border-input bg-background hover:bg-accent hover:text-accent-foreground font-medium rounded-lg transition-colors"
-              >
-                Browse Scenarios
+              <a href="#features" className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-6 py-2">
+                Learn More
               </a>
             </div>
           </div>
@@ -39,156 +34,112 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-white">
+      <section id="features" className="py-16 bg-slate-100">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-foreground mb-4">
-              Everything You Need for Accurate ROI Analysis
-            </h3>
+            <h3 className="text-3xl font-bold text-foreground mb-4">Powerful Features</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our calculator goes beyond basic ROI calculations to provide comprehensive business insights.
+              Our ROI calculator is packed with features to give you the most accurate and actionable insights.
             </p>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">🌍</span>
-                </div>
-                <CardTitle className="text-xl">Global Tax Compliance</CardTitle>
-                <CardDescription>
-                  Accurate tax calculations for 25+ countries with real-time 2025 tax rates and regulations.
-                </CardDescription>
+                <CardTitle>Multi-Scenario Analysis</CardTitle>
+                <CardDescription>Explore 7 detailed mini-scenarios for each business type.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">📈</p>
+              </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">🏢</span>
-                </div>
-                <CardTitle className="text-xl">35+ Business Types</CardTitle>
-                <CardDescription>
-                  From startups to enterprises, with 7 detailed scenarios each based on real market data.
-                </CardDescription>
+                <CardTitle>Country-Specific Taxes</CardTitle>
+                <CardDescription>Accurate tax calculations for 25+ countries.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">🌍</p>
+              </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">📊</span>
-                </div>
-                <CardTitle className="text-xl">Interactive Charts</CardTitle>
-                <CardDescription>
-                  Visual projections, cost breakdowns, and industry comparisons with exportable reports.
-                </CardDescription>
+                <CardTitle>Interactive Visuals</CardTitle>
+                <CardDescription>Understand your data with dynamic charts and graphs.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">📊</p>
+              </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">⚡</span>
-                </div>
-                <CardTitle className="text-xl">Real-time Validation</CardTitle>
-                <CardDescription>
-                  Smart validation with warnings and suggestions to optimize your business metrics.
-                </CardDescription>
+                <CardTitle>Detailed Reports</CardTitle>
+                <CardDescription>Generate comprehensive PDF reports of your ROI analysis.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">📄</p>
+              </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">🎯</span>
-                </div>
-                <CardTitle className="text-xl">Actionable Insights</CardTitle>
-                <CardDescription>
-                  Get personalized recommendations to improve profitability and reduce risks.
-                </CardDescription>
+                <CardTitle>User Accounts</CardTitle>
+                <CardDescription>Save and manage your calculations securely.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">👤</p>
+              </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="text-center">
               <CardHeader>
-                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-2xl">📱</span>
-                </div>
-                <CardTitle className="text-xl">Mobile Responsive</CardTitle>
-                <CardDescription>
-                  Calculate ROI anywhere with our fully responsive design and offline capabilities.
-                </CardDescription>
+                <CardTitle>Admin Dashboard</CardTitle>
+                <CardDescription>Monitor usage and manage users with ease.</CardDescription>
               </CardHeader>
+              <CardContent>
+                <p className="text-5xl mb-4">⚙️</p>
+              </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Calculator Section */}
+      {/* ROI Calculator Section */}
       <section id="calculator" className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-foreground mb-4">
-              ROI Calculator
-            </h3>
+            <h3 className="text-3xl font-bold text-foreground mb-4">ROI Calculator</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Select your business type and country to get started with accurate ROI calculations.
             </p>
           </div>
-
           <div className="max-w-6xl mx-auto">
-            <Suspense fallback={
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="loading-skeleton h-96"></div>
-                <div className="loading-skeleton h-96"></div>
-              </div>
-            }>
-              <ROICalculatorForm />
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="loading-skeleton h-96"></div>
+                  <div className="loading-skeleton h-96"></div>
+                </div>
+              }>
+                <ROICalculatorForm />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">R</span>
-                </div>
-                <span className="text-xl font-bold text-foreground">ROI Calculator Pro</span>
-              </div>
-              <p className="text-muted-foreground mb-4 max-w-md">
-                Professional business ROI analysis with global tax compliance and industry-specific insights.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                © 2025 ROI Calculator Pro. All rights reserved.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Features</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">ROI Calculator</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Business Scenarios</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Tax Calculations</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">PDF Reports</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-foreground mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition-colors">Documentation</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
-              </ul>
-            </div>
+      <footer className="bg-slate-800 text-white py-8">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-slate-400 mb-4">
+            &copy; {new Date().getFullYear()} ROI Calculator Pro. All rights reserved.
+          </p>
+          <div className="flex justify-center space-x-4 text-sm">
+            <a href="#" className="text-slate-300 hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="text-slate-300 hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="text-slate-300 hover:text-white transition-colors">Contact</a>
           </div>
         </div>
       </footer>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ErrorBoundary } from "@/components/error-boundary";
 // import { AuthProvider } from "@/contexts/auth-context";
 // import { Header } from "@/components/header"; // Header also commented out as it uses AuthProvider
 
@@ -37,13 +38,15 @@ export default function RootLayout({
         <title>ROI Calculator Pro</title>
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
-        <main>
-          {/* Temporarily disabled AuthProvider for debugging */}
-          {/* <AuthProvider> */}
-            {/* <Header /> */}
-            {children}
-          {/* </AuthProvider> */}
-        </main>
+        <ErrorBoundary>
+          <main>
+            {/* Temporarily disabled AuthProvider for debugging */}
+            {/* <AuthProvider> */}
+              {/* <Header /> */}
+              {children}
+            {/* </AuthProvider> */}
+          </main>
+        </ErrorBoundary>
       </body>
     </html>
   );
