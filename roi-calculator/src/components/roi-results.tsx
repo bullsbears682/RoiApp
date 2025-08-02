@@ -3,39 +3,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Target, 
-  AlertTriangle, 
-  CheckCircle,
-  Download,
-  Mail,
-  BarChart3,
-  PieChart,
-  LineChart
-} from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, AlertTriangle, CheckCircle, Download, Mail, BarChart3, PieChart, LineChart } from 'lucide-react';
 import { ROIResults as ROIResultsType, formatROIResults } from '@/lib/roiCalculator';
 import { formatCurrency } from '@/data/countries';
 import { cn } from '@/lib/utils';
 import { exportToPDF } from '@/lib/pdf-export';
-import { useAuth } from '@/contexts/auth-context';
-import {
-  LineChart as RechartsLineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
-  BarChart as RechartsBarChart,
-  Bar
-} from 'recharts';
+// import { useAuth } from '@/contexts/auth-context';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, BarChart as RechartsBarChart, Bar } from 'recharts';
 
 interface ROIResultsProps {
   results: ROIResultsType;
@@ -46,37 +20,34 @@ interface ROIResultsProps {
 }
 
 const COLORS = {
-  primary: 'hsl(var(--primary))',
-  secondary: 'hsl(var(--secondary))',
-  success: '#10b981',
+  primary: '#3b82f6',
+  secondary: '#8b5cf6',
+  accent: '#10b981',
   warning: '#f59e0b',
   danger: '#ef4444',
-  info: '#3b82f6',
-  muted: 'hsl(var(--muted-foreground))'
+  muted: '#6b7280'
 };
 
 export function ROIResults({ results, currency, countryName, businessType, scenario }: ROIResultsProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'projections' | 'breakdown' | 'insights'>('overview');
   const [isExporting, setIsExporting] = useState(false);
-  const { user } = useAuth();
+  // const { user } = useAuth(); // Temporarily disabled
   
   const formattedResults = formatROIResults(results, currency);
   
-  // Prepare chart data
   const projectionChartData = results.monthlyProjections.map(p => ({
     month: `Month ${p.month}`,
     revenue: p.revenue,
     costs: p.costs,
-    profit: p.netProfit,
-    roi: p.cumulativeROI
+    netProfit: p.netProfit,
+    cumulativeROI: p.cumulativeROI
   }));
 
   const costBreakdownData = [
-    { name: 'Marketing', value: results.costBreakdown.marketing, color: COLORS.primary },
-    { name: 'Operations', value: results.costBreakdown.operations, color: COLORS.secondary },
-    { name: 'Employees', value: results.costBreakdown.employees, color: COLORS.info },
-    { name: 'Taxes', value: results.costBreakdown.taxes, color: COLORS.warning },
-    { name: 'Additional', value: results.costBreakdown.additional, color: COLORS.muted }
+    { name: 'Marketing', value: results.inputs.marketingBudget, color: COLORS.primary },
+    { name: 'Operating', value: results.inputs.operatingExpenses, color: COLORS.secondary },
+    { name: 'Employees', value: results.inputs.employeeCosts || 0, color: COLORS.accent },
+    { name: 'Taxes', value: results.taxAmount, color: COLORS.warning }
   ].filter(item => item.value > 0);
 
   const getRiskColor = (impact: string) => {
@@ -89,8 +60,8 @@ export function ROIResults({ results, currency, countryName, businessType, scena
   };
 
   const getROIColor = (roi: number) => {
-    if (roi >= 20) return 'text-green-600';
-    if (roi >= 10) return 'text-yellow-600';
+    if (roi > 20) return 'text-green-600';
+    if (roi > 10) return 'text-yellow-600';
     return 'text-red-600';
   };
 
@@ -103,7 +74,7 @@ export function ROIResults({ results, currency, countryName, businessType, scena
         countryName,
         businessType,
         scenario,
-        userEmail: user?.email,
+        userEmail: undefined, // user?.email, // Temporarily disabled
       });
     } catch (error) {
       console.error('Error exporting PDF:', error);
@@ -122,120 +93,96 @@ export function ROIResults({ results, currency, countryName, businessType, scena
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Export/Email buttons */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">ROI Analysis Results</CardTitle>
-              <CardDescription>
-                {businessType} • {scenario} • {countryName}
-              </CardDescription>
-            </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleEmailResults}
-                disabled={isExporting}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                Email Results
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleExportPDF}
-                disabled={isExporting}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                {isExporting ? 'Exporting...' : 'Export PDF'}
-              </Button>
-            </div>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div>
+            <CardTitle className="text-2xl font-bold">ROI Calculation Results</CardTitle>
+            <CardDescription>
+              Detailed analysis for {businessType} ({scenario}) in {countryName}
+            </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleEmailResults}
+              disabled={isExporting}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Email Results
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleExportPDF}
+              disabled={isExporting}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Export PDF'}
+            </Button>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Key Metrics */}
+      {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">ROI</p>
-                <p className={cn("text-2xl font-bold", getROIColor(results.roi))}>
-                  {results.roi.toFixed(1)}%
-                </p>
-              </div>
-              <div className={cn("p-2 rounded-full", 
-                results.roi >= 0 ? "bg-green-100" : "bg-red-100"
-              )}>
-                {results.roi >= 0 ? (
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                ) : (
-                  <TrendingDown className="h-6 w-6 text-red-600" />
-                )}
-              </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ROI</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${getROIColor(results.roi)}`}>
+              {results.roi.toFixed(1)}%
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {results.roi >= 20 ? 'Excellent' : results.roi >= 10 ? 'Good' : 'Needs improvement'}
+            <p className="text-xs text-muted-foreground">
+              Return on Investment
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Net Profit</p>
-                <p className="text-2xl font-bold">
-                  {formatCurrency(results.netProfit, currency)}
-                </p>
-              </div>
-              <div className="p-2 rounded-full bg-blue-100">
-                <DollarSign className="h-6 w-6 text-blue-600" />
-              </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(results.netProfit, currency)}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              After taxes and expenses
+            <p className="text-xs text-muted-foreground">
+              After all expenses
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Break-even</p>
-                <p className="text-2xl font-bold">
-                  {results.breakEvenMonth ? `${results.breakEvenMonth}mo` : 'N/A'}
-                </p>
-              </div>
-              <div className="p-2 rounded-full bg-purple-100">
-                <Target className="h-6 w-6 text-purple-600" />
-              </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Break-even</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {results.breakEvenMonth ? `${results.breakEvenMonth} months` : 'N/A'}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground">
               Time to profitability
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Tax Rate</p>
-                <p className="text-2xl font-bold">
-                  {results.effectiveTaxRate.toFixed(1)}%
-                </p>
-              </div>
-              <div className="p-2 rounded-full bg-orange-100">
-                <BarChart3 className="h-6 w-6 text-orange-600" />
-              </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Customer LTV</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {results.customerLifetimeValue ? formatCurrency(results.customerLifetimeValue, currency) : 'N/A'}
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Effective tax burden
+            <p className="text-xs text-muted-foreground">
+              Lifetime value
             </p>
           </CardContent>
         </Card>
@@ -248,102 +195,96 @@ export function ROIResults({ results, currency, countryName, businessType, scena
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'projections', label: 'Projections', icon: LineChart },
             { id: 'breakdown', label: 'Cost Breakdown', icon: PieChart },
-            { id: 'insights', label: 'Insights', icon: Target }
-          ].map(tab => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={cn(
-                  "flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors",
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
+            { id: 'insights', label: 'Insights', icon: TrendingUp },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id as any)}
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === id
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </button>
+          ))}
         </nav>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Financial Summary */}
           <Card>
             <CardHeader>
               <CardTitle>Financial Summary</CardTitle>
+              <CardDescription>Key financial metrics for your business</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total Revenue</span>
-                <span className="font-medium">{formatCurrency(results.totalRevenue, currency)}</span>
+                <span className="text-sm font-medium">Total Revenue</span>
+                <span className="font-semibold">{formatCurrency(results.totalRevenue, currency)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Gross Profit</span>
-                <span className="font-medium">{formatCurrency(results.grossProfit, currency)}</span>
+                <span className="text-sm font-medium">Gross Profit</span>
+                <span className="font-semibold">{formatCurrency(results.grossProfit, currency)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Total Costs</span>
-                <span className="font-medium">{formatCurrency(results.totalCosts, currency)}</span>
+                <span className="text-sm font-medium">Total Costs</span>
+                <span className="font-semibold">{formatCurrency(results.totalCosts, currency)}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Tax Amount</span>
-                <span className="font-medium">{formatCurrency(results.taxAmount, currency)}</span>
+                <span className="text-sm font-medium">Taxes</span>
+                <span className="font-semibold">{formatCurrency(results.taxAmount, currency)}</span>
               </div>
-              <div className="border-t pt-2">
-                <div className="flex justify-between items-center font-semibold">
-                  <span>Net Profit</span>
-                  <span className={getROIColor(results.roi)}>
-                    {formatCurrency(results.afterTaxProfit, currency)}
-                  </span>
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold">Net Profit</span>
+                  <span className="text-lg font-bold">{formatCurrency(results.netProfit, currency)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer Metrics</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {results.customerLifetimeValue && (
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Customer LTV</span>
-                  <span className="font-medium">{formatCurrency(results.customerLifetimeValue, currency)}</span>
-                </div>
-              )}
-              {results.paybackPeriod && (
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Payback Period</span>
-                  <span className="font-medium">{results.paybackPeriod.toFixed(1)} months</span>
-                </div>
-              )}
-              {results.customersNeeded && (
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Customers Needed</span>
-                  <span className="font-medium">{results.customersNeeded.toLocaleString()}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Monthly Cash Flow</span>
-                <span className="font-medium">{formatCurrency(results.monthlyNetCashFlow, currency)}</span>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Customer Metrics */}
+          {(results.customerLifetimeValue || results.paybackPeriod || results.customersNeeded) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Metrics</CardTitle>
+                <CardDescription>Customer acquisition and retention insights</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {results.customerLifetimeValue && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Customer LTV</span>
+                    <span className="font-semibold">{formatCurrency(results.customerLifetimeValue, currency)}</span>
+                  </div>
+                )}
+                {results.paybackPeriod && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Payback Period</span>
+                    <span className="font-semibold">{results.paybackPeriod.toFixed(1)} months</span>
+                  </div>
+                )}
+                {results.customersNeeded && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Customers Needed</span>
+                    <span className="font-semibold">{results.customersNeeded}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
 
       {activeTab === 'projections' && (
         <Card>
           <CardHeader>
-            <CardTitle>Revenue & ROI Projections</CardTitle>
-            <CardDescription>
-              Monthly projections showing revenue growth and cumulative ROI
-            </CardDescription>
+            <CardTitle>12-Month Financial Projections</CardTitle>
+            <CardDescription>Revenue, costs, and profitability over time</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -351,19 +292,30 @@ export function ROIResults({ results, currency, countryName, businessType, scena
                 <RechartsLineChart data={projectionChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip 
-                    formatter={(value: number, name: string) => [
-                      name === 'roi' ? `${value.toFixed(1)}%` : formatCurrency(value, currency),
-                      name === 'roi' ? 'ROI' : name.charAt(0).toUpperCase() + name.slice(1)
-                    ]}
-                  />
+                  <YAxis />
+                  <Tooltip formatter={(value: any) => formatCurrency(Number(value), currency)} />
                   <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="revenue" stroke={COLORS.primary} strokeWidth={2} name="Revenue" />
-                  <Line yAxisId="left" type="monotone" dataKey="costs" stroke={COLORS.warning} strokeWidth={2} name="Costs" />
-                  <Line yAxisId="left" type="monotone" dataKey="profit" stroke={COLORS.success} strokeWidth={2} name="Profit" />
-                  <Line yAxisId="right" type="monotone" dataKey="roi" stroke={COLORS.info} strokeWidth={2} strokeDasharray="5 5" name="ROI %" />
+                  <Line 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke={COLORS.primary} 
+                    strokeWidth={2}
+                    name="Revenue"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="costs" 
+                    stroke={COLORS.danger} 
+                    strokeWidth={2}
+                    name="Costs"
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="netProfit" 
+                    stroke={COLORS.accent} 
+                    strokeWidth={2}
+                    name="Net Profit"
+                  />
                 </RechartsLineChart>
               </ResponsiveContainer>
             </div>
@@ -376,6 +328,7 @@ export function ROIResults({ results, currency, countryName, businessType, scena
           <Card>
             <CardHeader>
               <CardTitle>Cost Breakdown</CardTitle>
+              <CardDescription>Distribution of your business expenses</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
@@ -385,15 +338,17 @@ export function ROIResults({ results, currency, countryName, businessType, scena
                       data={costBreakdownData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
+                      labelLine={false}
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
                     >
                       {costBreakdownData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value, currency)} />
+                    <Tooltip formatter={(value: any) => formatCurrency(Number(value), currency)} />
                   </RechartsPieChart>
                 </ResponsiveContainer>
               </div>
@@ -403,26 +358,21 @@ export function ROIResults({ results, currency, countryName, businessType, scena
           <Card>
             <CardHeader>
               <CardTitle>Cost Details</CardTitle>
+              <CardDescription>Detailed breakdown of expenses</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {costBreakdownData.map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+              {costBreakdownData.map((item, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-muted-foreground">{item.name}</span>
+                    <span className="text-sm font-medium">{item.name}</span>
                   </div>
-                  <span className="font-medium">{formatCurrency(item.value, currency)}</span>
+                  <span className="font-semibold">{formatCurrency(item.value, currency)}</span>
                 </div>
               ))}
-              <div className="border-t pt-2">
-                <div className="flex justify-between items-center font-semibold">
-                  <span>Total Costs</span>
-                  <span>{formatCurrency(results.totalCosts + results.taxAmount, currency)}</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -431,66 +381,55 @@ export function ROIResults({ results, currency, countryName, businessType, scena
       {activeTab === 'insights' && (
         <div className="space-y-6">
           {/* Industry Comparison */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Industry Comparison</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className={cn("text-2xl font-bold", 
-                    results.industryComparison.revenueVsBenchmark >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {results.industryComparison.revenueVsBenchmark >= 0 ? '+' : ''}
-                    {results.industryComparison.revenueVsBenchmark.toFixed(1)}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">Revenue vs Benchmark</p>
+          {results.industryComparison && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Industry Comparison</CardTitle>
+                <CardDescription>How your metrics compare to industry benchmarks</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Revenue vs Benchmark</span>
+                  <span className={`font-semibold ${results.industryComparison.revenueVsBenchmark > 1 ? 'text-green-600' : 'text-red-600'}`}>
+                    {(results.industryComparison.revenueVsBenchmark * 100).toFixed(1)}%
+                  </span>
                 </div>
-                <div className="text-center">
-                  <div className={cn("text-2xl font-bold", 
-                    results.industryComparison.marginVsBenchmark >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {results.industryComparison.marginVsBenchmark >= 0 ? '+' : ''}
-                    {results.industryComparison.marginVsBenchmark.toFixed(1)}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">Margin vs Benchmark</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Margin vs Benchmark</span>
+                  <span className={`font-semibold ${results.industryComparison.marginVsBenchmark > 1 ? 'text-green-600' : 'text-red-600'}`}>
+                    {(results.industryComparison.marginVsBenchmark * 100).toFixed(1)}%
+                  </span>
                 </div>
-                <div className="text-center">
-                  <div className={cn("text-2xl font-bold", 
-                    results.industryComparison.growthVsBenchmark >= 0 ? "text-green-600" : "text-red-600"
-                  )}>
-                    {results.industryComparison.growthVsBenchmark >= 0 ? '+' : ''}
-                    {results.industryComparison.growthVsBenchmark.toFixed(1)}%
-                  </div>
-                  <p className="text-sm text-muted-foreground">Growth vs Benchmark</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Growth vs Benchmark</span>
+                  <span className={`font-semibold ${results.industryComparison.growthVsBenchmark > 1 ? 'text-green-600' : 'text-red-600'}`}>
+                    {(results.industryComparison.growthVsBenchmark * 100).toFixed(1)}%
+                  </span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Risk Factors */}
           {results.riskFactors.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                  Risk Factors
-                </CardTitle>
+                <CardTitle>Risk Factors</CardTitle>
+                <CardDescription>Potential risks and challenges to consider</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {results.riskFactors.map((risk, index) => (
-                    <div key={index} className={cn("p-3 rounded-lg border", getRiskColor(risk.impact))}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{risk.factor}</span>
-                        <span className="text-xs uppercase font-semibold">
-                          {risk.impact} risk
-                        </span>
-                      </div>
-                      <p className="text-sm">{risk.description}</p>
+              <CardContent className="space-y-3">
+                {results.riskFactors.map((risk, index) => (
+                  <div key={index} className={`p-3 rounded-lg border ${getRiskColor(risk.impact)}`}>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="font-medium">{risk.factor}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-white/50">
+                        {risk.impact.toUpperCase()}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm opacity-80">{risk.description}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
@@ -499,25 +438,22 @@ export function ROIResults({ results, currency, countryName, businessType, scena
           {results.recommendations.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  Recommendations
-                </CardTitle>
+                <CardTitle>Recommendations</CardTitle>
+                <CardDescription>Actionable insights to improve your ROI</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {results.recommendations.map((rec, index) => (
-                    <div key={index} className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-green-800">{rec.category}</span>
-                      </div>
-                      <p className="text-sm text-green-700 mb-2">{rec.suggestion}</p>
-                      <p className="text-xs text-green-600 font-medium">
-                        💡 {rec.potentialImpact}
-                      </p>
+              <CardContent className="space-y-4">
+                {results.recommendations.map((rec, index) => (
+                  <div key={index} className="p-4 rounded-lg border border-green-200 bg-green-50">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="font-medium text-green-800">{rec.category}</span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-green-700 mb-2">{rec.suggestion}</p>
+                    <p className="text-xs text-green-600 font-medium">
+                      Potential Impact: {rec.potentialImpact}
+                    </p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}

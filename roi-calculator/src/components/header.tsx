@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Calculator, User, LogOut, Settings, Menu, X } from 'lucide-react';
-import { useAuth } from '@/contexts/auth-context';
+// import { useAuth } from '@/contexts/auth-context';
 
 export function Header() {
-  const { user, logout, isLoading } = useAuth();
+  // const { user, logout, isLoading } = useAuth(); // Temporarily disabled
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
-      await logout();
+      // await logout(); // Temporarily disabled
       window.location.href = '/';
     } catch (error) {
       console.error('Logout failed:', error);
@@ -47,9 +47,9 @@ export function Header() {
             </Link>
           </nav>
 
-          {/* Desktop Authentication */}
+          {/* Desktop Authentication - Temporarily disabled */}
           <div className="hidden md:flex items-center space-x-4">
-            {isLoading ? (
+            {/* {isLoading ? (
               <div className="h-9 w-20 bg-slate-200 animate-pulse rounded"></div>
             ) : user ? (
               <div className="flex items-center space-x-3">
@@ -78,7 +78,7 @@ export function Header() {
                   Logout
                 </Button>
               </div>
-            ) : (
+            ) : ( */}
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm" asChild>
                   <Link href="/auth">Login</Link>
@@ -87,7 +87,7 @@ export function Header() {
                   <Link href="/auth">Sign Up</Link>
                 </Button>
               </div>
-            )}
+            {/* )} */}
           </div>
 
           {/* Mobile Menu Button */}
@@ -124,9 +124,9 @@ export function Header() {
                 Features
               </Link>
               
-              {/* Mobile Authentication */}
+              {/* Mobile Authentication - Temporarily disabled */}
               <div className="pt-4 border-t border-slate-200">
-                {isLoading ? (
+                {/* {isLoading ? (
                   <div className="h-9 w-20 bg-slate-200 animate-pulse rounded"></div>
                 ) : user ? (
                   <div className="space-y-3">
@@ -159,7 +159,7 @@ export function Header() {
                       Logout
                     </Button>
                   </div>
-                ) : (
+                ) : ( */}
                   <div className="space-y-2">
                     <Button variant="outline" size="sm" className="w-full" asChild>
                       <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)}>
@@ -172,7 +172,7 @@ export function Header() {
                       </Link>
                     </Button>
                   </div>
-                )}
+                {/* )} */}
               </div>
             </nav>
           </div>
